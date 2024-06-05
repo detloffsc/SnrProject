@@ -2,6 +2,7 @@ from __future__ import print_function
 import os, sys, time, datetime, json, random
 import numpy as np
 import tensorflow as ts
+import json
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers.core import Dense, Activation
@@ -13,16 +14,21 @@ from GameExperience import GameExperience
 
 plt.show()
 
-maze = np.array([
-    [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-    [ 1.,  0.,  1.,  1.,  1.,  0.,  1.,  1.],
-    [ 1.,  1.,  1.,  1.,  0.,  1.,  0.,  1.],
-    [ 1.,  1.,  1.,  0.,  1.,  1.,  1.,  1.],
-    [ 1.,  1.,  0.,  1.,  1.,  1.,  1.,  1.],
-    [ 1.,  1.,  1.,  0.,  1.,  0.,  0.,  0.],
-    [ 1.,  1.,  1.,  0.,  1.,  1.,  1.,  1.],
-    [ 1.,  1.,  1.,  1.,  0.,  1.,  1.,  1.]
-])
+
+#maze = np.array([
+#    [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
+#    [ 1.,  0.,  1.,  1.,  1.,  0.,  1.,  1.],
+#    [ 1.,  1.,  1.,  1.,  0.,  1.,  0.,  1.],
+#    [ 1.,  1.,  1.,  0.,  1.,  1.,  1.,  1.],
+#    [ 1.,  1.,  0.,  1.,  1.,  1.,  1.,  1.],
+#    [ 1.,  1.,  1.,  0.,  1.,  0.,  0.,  0.],
+#    [ 1.,  1.,  1.,  0.,  1.,  1.,  1.,  1.],
+#    [ 1.,  1.,  1.,  1.,  0.,  1.,  1.,  1.]
+#])
+
+with open('maze.json') as mazes:
+    maze = json.load(mazes)
+
 
 def show(qmaze):
     plt.grid('on')
