@@ -1,12 +1,14 @@
 from __future__ import print_function
+from flask import Flask, render_template
 import os, sys, time, datetime, json, random
 import numpy as np
 import tensorflow as ts
+import sqlite3
 import json
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers.core import Dense, Activation
-from tensorflow.python.keras.optimizers import SGD , Adam, RMSprop
+#from tensorflow.python.keras.optimizers import SGD , Adam, RMSprop
 from tensorflow.python.keras.layers.advanced_activations import PReLU
 import matplotlib.pyplot as plt
 from TreasureMaze import TreasureMaze
@@ -235,3 +237,39 @@ show(qmaze)
 pirate_start = (0, 0)
 play_game(model, qmaze, pirate_start)
 show(qmaze)
+
+#creating and connecting database using sqlite
+conn = sqlite3.connect('mazedata.db')
+cursor = conn.cursor()
+
+#creating table to store training data
+cursor.execute('''CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY, 
+                                                    epoch REAL,
+                                                    max_memory REAL,
+                                                    data REAL,
+                                                    time REAL)''')
+
+def insert_data(epoch, max_memory, data_size, t):
+    cursor.execute("INSERT INTO data (epoch, max_memory, data, time) VALUES (?, ?, ?, ?)", (epoch, max_memory, data_size, t))
+    conn.commit()
+
+def get_all_data():
+    cursor.execute("SELECT * FROM data")
+    return cursor.fetchall()
+
+conn.close()
+
+#connecting database to html display
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    conn = sqlite3.connect('mazedata.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM your_table")
+    rows = cursor.fetchall()
+    conn.close()
+    return render_template('display.html', rows=rows)
+
+if __name__ == '__main__':
+    app.run(debug=True)
