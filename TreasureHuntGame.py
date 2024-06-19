@@ -31,6 +31,9 @@ plt.show()
 with open('maze.json') as mazes:
     maze = json.load(mazes)
 
+maze = np.array(maze)
+#for debugging
+#print(maze)
 
 def show(qmaze):
     plt.grid('on')

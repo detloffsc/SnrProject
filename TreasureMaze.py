@@ -96,6 +96,7 @@ class TreasureMaze(object):
 
     def act(self,  action):
         self.update_state(action)
+        reward = 0
         reward = self.get_reward()
         self.total_reward += reward
         status = self.game_status()
