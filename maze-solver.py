@@ -1,20 +1,43 @@
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
+from collections import deque
 
-def generate_maze(size):
-    maze = np.random.choice([0, 1], size=size)
-    maze[0, 0] = 0  # Start
-    maze[size[0] - 1, size[1] - 1] = 0  # End
+# Function to generate a solvable maze using backtracking algorithm
+def generate_solvable_maze(size):
+    maze = np.ones(size, dtype=np.int8)
+    start = (0, 0)
+    end = (size[0] - 1, size[1] - 1)
+    stack = [start]
+    maze[start] = 0
+
+    while stack:
+        current = stack[-1]
+        if current == end:
+            break
+        neighbors = []
+        for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            next_cell = (current[0] + direction[0], current[1] + direction[1])
+            if 0 <= next_cell[0] < size[0] and 0 <= next_cell[1] < size[1] and maze[next_cell] == 1:
+                neighbors.append(next_cell)
+
+        if neighbors:
+            next_cell = neighbors[np.random.randint(0, len(neighbors))]
+            stack.append(next_cell)
+            maze[next_cell] = 0
+        else:
+            stack.pop()
+
     return maze
 
+# Function to create training data
 def create_training_data(num_mazes, size):
     inputs = []
     targets = []
     for _ in range(num_mazes):
-        maze = generate_maze(size)
+        maze = generate_solvable_maze(size)
         inputs.append(maze.flatten())
-        # For simplicity, we're not using targets in this example
-        targets.append(1)
+        targets.append(maze.flatten())  # Using the maze itself as the target for simplicity
     return np.array(inputs), np.array(targets)
 
 # Generate training data
@@ -33,20 +56,31 @@ model = tf.keras.Sequential([
 model.compile(optimizer='adam', loss='binary_crossentropy')
 
 # Train the model
-model.fit(X_train, X_train, epochs=10)
+model.fit(X_train, y_train, epochs=30)
 
 # Function to solve the maze using the trained model
 def solve_maze(model, maze):
     input_data = maze.flatten().reshape(1, -1)
     prediction = model.predict(input_data)
-    solved_maze = prediction.reshape(maze.shape)
+    solved_maze = (prediction > 0.5).astype(int).reshape(maze.shape)
     return solved_maze
 
+# Function to visualize mazes
+def plot_mazes(original_maze, solved_maze):
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    axs[0].imshow(original_maze, cmap='gray')
+    axs[0].set_title('Original Maze')
+    axs[1].imshow(solved_maze, cmap='gray')
+    axs[1].set_title('Solved Maze')
+    plt.show()
+
 # Example usage
-maze = generate_maze(size)
+maze = generate_solvable_maze(size)
 print("Original Maze:")
 print(maze)
 
 solved_maze = solve_maze(model, maze)
 print("Solved Maze:")
 print(solved_maze)
+
+plot_mazes(maze, solved_maze)
